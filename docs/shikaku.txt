@@ -1,0 +1,99 @@
+
+=====================================================================================
+D:
+cd D:\Ps\BB\shikaku
+yarn
+yarn run dev 
+
+
+=====================================================================================
+Shikaku [Rectangles]
+The Rules
+	Match the Number: Every rectangle must contain exactly one number, 
+	and the area of the rectangle (in grid cells) must equal that number.
+
+	Fill the Grid: Every single cell on the grid must belong to a rectangle.
+	No Overlaps: Rectangles cannot overlap or leave empty gaps.
+	Shape Limits: Regions must be perfect rectangles or squares.
+
+
+Solving Techniques
+	1. Start with Prime Numbers
+	Numbers that are prime (like 2, 3, 5, 7, 11, 13) 
+	only have one possible rectangular dimension: 1 × N. 
+	For example, a 5 must be a straight line of 5 cells. 
+	This makes them highly restrictive and usually the best place to start.
+
+	2. Evaluate Corners and Edges
+	A corner clue is trapped by the grid's boundaries, severely limiting its possible shapes. 
+	Look at clues nestled in corners and calculate if their allowed shapes can fit without clipping out-of-bounds.
+
+	3. Large Numbers Partition the Grid
+	Large clues in a grid leave limited room for other rectangles. 
+	You can often test the 1 × N or N × M configurations for large numbers to see which ones break or box in other adjacent clues.
+
+	4. Forced Shapes and Unreached Cells
+	Scan the grid for isolated cells. 
+	If an empty cell can only be reached by one specific number 
+	(because all other neighbors are blocked or too far away), 
+	you can instantly map out the dimensions of that number's rectangle.
+
+	5. The Process of Elimination
+	Because the entire grid must be filled without overlaps, 
+	drawing one rectangle rules out those cells for all other numbers. 
+	As the grid fills up, the remaining unassigned spaces will force the final shapes to lock into place.
+
+
+https://shikaku.ch/guide.html
+	Look for 1s and 2s
+
+
+
+
+
+
+=====================================================================================
+suggest some techniques to solve shikaku  puzzle
+[đánh số cho từng rectangle ứng với thứ tự clue xuất hiện]
+[mark ô nào thuộc về vùng nào]
+[chọn 5 màu, tô từng vùng 1 màu]
+	Start with clues near corners and edges.
+	Generate possible rectangles for large clues.
+	Eliminate candidates that overlap other clues.
+	Solve forced rectangles.
+	Recompute possibilities.
+	Use area accounting and bottleneck analysis.
+	Apply contradiction only if necessary.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+=====================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
