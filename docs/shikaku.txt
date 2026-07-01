@@ -69,7 +69,39 @@ suggest some techniques to solve shikaku  puzzle
 
 
 
+=====================================================================================
 
+
+learn from code D:\Ps\BB\sudoku [this is for sudoku game with different rules]
+make shikaku game to folder D:\Ps\BB\shikaku
+with rules as in the doc: D:\Ps\BB\shikaku\docs\rules.txt
+this include:
+Color: [4 colors] + No [this will use for solve game or add some hints]
+Init section: Random, Import, Manual
+Functional: Validate, Export, Block Init, Solve
+Cell Model with: cell color [which color it should belong to]
+
+Validation base on rules.txt
+Solution base on idea:
+	0. we mark each clue number with group number index 
+	1. with each cell have number on it and it in the corner 
+	[mean 3 cell up-left or up-right or down-left or down-right] already grouped to another group,
+	it should have different number.
+	And if it is prime, we can sure that it create rectangle px1,
+	then we spread from it to form rectangle px1 with cells have same group number X
+	
+	If it not prime, we can calculate minimum factor F of it then we sure square 
+	FxF from it is same group number with it. In this case we can calculate 
+	distance from it to cell in same row/column to eleminate cases with facor from/greater than that distance
+	
+	2. If cell not in corner position, we calculate minimum factor F of it
+	and distance D from it to cell in same row/column, if D < F then it should spread to other direction
+	with minimum length [F-D], then cells from [it to that length same group number X]
+	
+	3. If maximum factor F of one cell cannot reach to next cell in [same row/column] and there no number between those cells 
+	then length from next cell to minimum D-F is belong to next cell group.
+
+	
 
 
 
@@ -79,17 +111,6 @@ suggest some techniques to solve shikaku  puzzle
 
 
 =====================================================================================
-
-
-
-
-
-
-
-
-
-
-
 
 
 
