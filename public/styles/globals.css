@@ -34,3 +34,36 @@ body {
   height: 100vh;
   flex-direction: column;
 }
+
+.btn-interaction {
+  width: 90px;
+  box-sizing: border-box;
+  padding: 0.15rem 0.5rem;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 500;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: background 0.2s;
+  height: 28px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-interaction:hover {
+  background: #1d4ed8;
+}
+
+.btn-interaction:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.label-interaction {
+  width: 120px;
+  text-align: right;
+  padding-right: 8px;
+  flex-shrink: 0;
+}

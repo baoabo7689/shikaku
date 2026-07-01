@@ -76,8 +76,9 @@ learn from code D:\Ps\BB\sudoku [this is for sudoku game with different rules]
 make shikaku game to folder D:\Ps\BB\shikaku
 with rules as in the doc: D:\Ps\BB\shikaku\docs\rules.txt
 this include:
+WidthxHeight input with 2 textbox
 Color: [4 colors] + No [this will use for solve game or add some hints]
-Init section: Random, Import, Manual
+Init section: Random [only 1 random, not separate by level], Import, Manual
 Functional: Validate, Export, Block Init, Solve
 Cell Model with: cell color [which color it should belong to]
 
@@ -103,6 +104,33 @@ Solution base on idea:
 
 	
 
+WidthxHeight input with 2 textbox, in first section
+Random [only 1 random, not separate by level]
+
+
+decrease button width,
+puzzle grid must align top as message box
+rearrange buttons as exact with:
+Init section: Random, Import, Manual
+Functional: Validate, Export, Block Init, Solve
+
+decrease buttons size, grid cell size and make grid should align top same as message area box
+
+maybe some area next together have same color, 
+we should update color by loop through areas then choose color not same with it adjust areas
+
+
+I still see 2 adsendent have same color
+Maybe 5 colors filling need some algorithm.
+So choose 6 colors to fill, maybe it will be simpler.
+
+
+
+=====================================================================================
+
+
+we can extend this puzzle by: add black color area as some hints in the init.
+then in solution steps we should calculate corners/edges base on hints/solved cells
 
 
 
