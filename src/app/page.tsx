@@ -119,9 +119,9 @@ export default function HomePage() {
               {translations.interaction.width}
               <input
                 type="number"
-                min={3} max={20}
+                min={3} max={30}
                 value={gridWidth}
-                onChange={e => setGridWidth(Math.max(3, Math.min(20, parseInt(e.target.value) || 10)))}
+                onChange={e => setGridWidth(Math.max(3, Math.min(30, parseInt(e.target.value) || 10)))}
                 className="w-14 h-8 rounded border border-gray-300 text-center text-sm outline-none px-1"
               />
             </label>
@@ -130,9 +130,9 @@ export default function HomePage() {
               {translations.interaction.height}
               <input
                 type="number"
-                min={3} max={20}
+                min={3} max={30}
                 value={gridHeight}
-                onChange={e => setGridHeight(Math.max(3, Math.min(20, parseInt(e.target.value) || 10)))}
+                onChange={e => setGridHeight(Math.max(3, Math.min(30, parseInt(e.target.value) || 10)))}
                 className="w-14 h-8 rounded border border-gray-300 text-center text-sm outline-none px-1"
               />
             </label>

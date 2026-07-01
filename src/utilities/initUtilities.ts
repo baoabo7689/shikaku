@@ -105,7 +105,7 @@ function tilingToGrid(tiling: number[][]): ShikakuGridModel {
 export const initUtilities = {
   random(rows: number, cols: number): ShikakuGridModel {
     const area = rows * cols;
-    const maxArea = Math.max(2, Math.min(Math.floor(area / 6), 20));
+    const maxArea = Math.max(2, Math.min(Math.floor(area / 6), 30));
     return tilingToGrid(generateTiling(rows, cols, maxArea));
   },
 };

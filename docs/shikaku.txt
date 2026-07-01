@@ -102,6 +102,10 @@ Solution base on idea:
 	3. If maximum factor F of one cell cannot reach to next cell in [same row/column] and there no number between those cells 
 	then length from next cell to minimum D-F is belong to next cell group.
 
+	4. if one area not include number cell hint, it should belong to adjacent area,
+	we should find out area is missing cells with area as it. then it belong to that area.
+	
+	
 	
 
 WidthxHeight input with 2 textbox, in first section

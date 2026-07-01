@@ -36,8 +36,14 @@ function overlaps(a: Rect, b: Rect): boolean {
   return !(a.bottom < b.top || a.top > b.bottom || a.right < b.left || a.left > b.right);
 }
 
+// Two rects are adjacent iff they share at least one edge cell (4-connected boundary).
+// Corner-touching only (diagonal) is NOT adjacent — BFS does not merge those groups.
 function adjacent(a: Rect, b: Rect): boolean {
-  return !(a.bottom < b.top - 1 || a.top > b.bottom + 1 || a.right < b.left - 1 || a.left > b.right + 1);
+  const hEdge = (a.bottom + 1 === b.top || b.bottom + 1 === a.top) &&
+    Math.max(a.left, b.left) <= Math.min(a.right, b.right);
+  const vEdge = (a.right + 1 === b.left || b.right + 1 === a.left) &&
+    Math.max(a.top, b.top) <= Math.min(a.bottom, b.bottom);
+  return hEdge || vEdge;
 }
 
 function greedyColor(assignments: Assignment[]): Assignment[] {
@@ -54,12 +60,9 @@ function greedyColor(assignments: Assignment[]): Assignment[] {
 
   const colors: (ShikakuColor | null)[] = Array(n).fill(null);
 
-  // DSatur + backtracking: picks the highest-saturation uncolored node at each step,
-  // backtracks if no valid color exists (guarantees a solution for planar graphs).
   function colorStep(step: number): boolean {
     if (step === n) return true;
 
-    // DSatur heuristic: pick uncolored node with most distinctly-colored neighbors
     let best = -1, bestSat = -1, bestDeg = -1;
     for (let i = 0; i < n; i++) {
       if (colors[i] !== null) continue;
@@ -130,25 +133,115 @@ function computePossibleRects(
   return rects;
 }
 
-// Propagate forced assignments: any clue with exactly 1 possible rect gets assigned immediately.
-function propagateForced(
+// Step 5 — Orphan-region pruning:
+// Find connected groups of uncovered cells that contain no remaining clue cell.
+// These "orphaned" cells must be covered by an adjacent clue's rectangle.
+// If only one clue has compatible possible rects, prune its domain to those rects only.
+function pruneIsolatedRegions(
+  rem: SolverClue[],
+  asgn: Assignment[],
+  rows: number,
+  cols: number
+): SolverClue[] | null {
+  const covered = new Set<string>();
+  for (const a of asgn)
+    for (let r = a.rect.top; r <= a.rect.bottom; r++)
+      for (let c = a.rect.left; c <= a.rect.right; c++)
+        covered.add(`${r},${c}`);
+
+  const cluePos = new Set(rem.map(cl => `${cl.row},${cl.col}`));
+  const visited = new Set<string>();
+  let result = rem;
+
+  for (let startR = 0; startR < rows; startR++) {
+    for (let startC = 0; startC < cols; startC++) {
+      const startKey = `${startR},${startC}`;
+      if (covered.has(startKey) || visited.has(startKey)) continue;
+
+      // BFS: collect all uncovered cells in this connected component
+      const group: [number, number][] = [];
+      let hasClue = false;
+      const queue: [number, number][] = [[startR, startC]];
+      visited.add(startKey);
+
+      while (queue.length > 0) {
+        const [r, c] = queue.shift()!;
+        group.push([r, c]);
+        if (cluePos.has(`${r},${c}`)) hasClue = true;
+
+        for (const [nr, nc] of [[r - 1, c], [r + 1, c], [r, c - 1], [r, c + 1]]) {
+          const nk = `${nr},${nc}`;
+          if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+            !covered.has(nk) && !visited.has(nk)) {
+            visited.add(nk);
+            queue.push([nr, nc]);
+          }
+        }
+      }
+
+      if (hasClue) continue; // group contains a clue — handled normally
+
+      // Orphaned group: find which remaining clues have rects covering ALL its cells
+      const canCover: number[] = [];
+      for (let i = 0; i < result.length; i++) {
+        const ok = result[i].possibleRects.some(rect =>
+          group.every(([r, c]) =>
+            r >= rect.top && r <= rect.bottom && c >= rect.left && c <= rect.right
+          )
+        );
+        if (ok) canCover.push(i);
+      }
+
+      if (canCover.length === 0) return null; // contradiction
+
+      if (canCover.length === 1) {
+        const idx = canCover[0];
+        const filtered = result[idx].possibleRects.filter(rect =>
+          group.every(([r, c]) =>
+            r >= rect.top && r <= rect.bottom && c >= rect.left && c <= rect.right
+          )
+        );
+        if (filtered.length === 0) return null;
+        if (filtered.length < result[idx].possibleRects.length) {
+          result = result.map((cl, i) => i === idx ? { ...cl, possibleRects: filtered } : cl);
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+// Combined propagation loop: runs Step 5 (orphan pruning) and forced-assignment
+// in alternation until neither can make further progress.
+function propagate(
   remaining: SolverClue[],
-  assigned: Assignment[]
+  assigned: Assignment[],
+  rows: number,
+  cols: number
 ): { remaining: SolverClue[]; assigned: Assignment[] } | null {
   let rem = [...remaining];
   let asgn = [...assigned];
-  let changed = true;
 
-  while (changed) {
-    changed = false;
+  while (true) {
+    let anyChange = false;
 
+    // Step 5: prune domains from orphaned cell groups
+    const pruned = pruneIsolatedRegions(rem, asgn, rows, cols);
+    if (pruned === null) return null;
+    if (pruned.some((c, i) => c.possibleRects.length < rem[i].possibleRects.length)) {
+      rem = pruned;
+      anyChange = true;
+    }
+
+    // Forced single assignment: find the first clue with exactly 1 possible rect
+    let forcedOne = false;
     for (let i = 0; i < rem.length; i++) {
       if (rem[i].possibleRects.length === 0) return null;
 
       if (rem[i].possibleRects.length === 1) {
         const clue = rem[i];
         const rect = clue.possibleRects[0];
-
         if (asgn.some(a => overlaps(a.rect, rect))) return null;
 
         asgn = [...asgn, { row: clue.row, col: clue.col, rect, color: 'red' }];
@@ -156,11 +249,15 @@ function propagateForced(
           ...c,
           possibleRects: c.possibleRects.filter(r => !overlaps(r, rect)),
         }));
-
-        changed = true;
+        anyChange = true;
+        forcedOne = true;
         break;
       }
     }
+
+    if (!anyChange) break;
+    // After a forced assignment, re-run Step 5 immediately (new coverage may create orphans)
+    if (forcedOne) continue;
   }
 
   return { remaining: rem, assigned: asgn };
@@ -172,7 +269,7 @@ function backtrack(
   remaining: SolverClue[],
   assigned: Assignment[]
 ): Assignment[] | null {
-  const propagated = propagateForced(remaining, assigned);
+  const propagated = propagate(remaining, assigned, rows, cols);
   if (propagated === null) return null;
 
   const { remaining: rem, assigned: asgn } = propagated;
